@@ -10,88 +10,100 @@
         Height="700" 
         Width="1200"
         WindowStartupLocation="CenterScreen">
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </Window.Resources>
-    <Grid>
+  <Window.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+  </Window.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Zone de saisie -->
+    <GroupBox Grid.Row="0" Header="Ajouter un personnage" Margin="10" Padding="10">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="150"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="120"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="120"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Zone de saisie -->
-        <GroupBox Grid.Row="0" Header="Ajouter un personnage" Margin="10" Padding="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Nom :" VerticalAlignment="Center" Margin="0,0,5,5"/>
-                <TextBox x:Name="txtNom" Grid.Row="0" Grid.Column="1" Margin="0,0,10,5" Height="25"/>
-                
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="Naissance :" VerticalAlignment="Center" Margin="0,0,5,5"/>
-                <DatePicker x:Name="dpNaissance" Grid.Row="0" Grid.Column="3" Margin="0,0,10,5" Height="25"/>
-                
-                <TextBlock Grid.Row="0" Grid.Column="4" Text="Décès :" VerticalAlignment="Center" Margin="0,0,5,5"/>
-                <DatePicker x:Name="dpDeces" Grid.Row="0" Grid.Column="5" Margin="0,0,10,5" Height="25"/>
-                <CheckBox x:Name="chkVivant" Grid.Row="0" Grid.Column="6" Content="Toujours vivant" VerticalAlignment="Center" 
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Nom :" VerticalAlignment="Center" Margin="0,0,5,5"/>
+        <TextBox x:Name="txtNom" Grid.Row="0" Grid.Column="1" Margin="0,0,10,5" Height="25"/>
+
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="Naissance :" VerticalAlignment="Center" Margin="0,0,5,5"/>
+        <DatePicker x:Name="dpNaissance" Grid.Row="0" Grid.Column="3" Margin="0,0,10,5" Height="25"/>
+
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="Décès :" VerticalAlignment="Center" Margin="0,0,5,5"/>
+        <DatePicker x:Name="dpDeces" Grid.Row="0" Grid.Column="5" Margin="0,0,10,5" Height="25"/>
+        <CheckBox x:Name="chkVivant" Grid.Row="0" Grid.Column="6" Content="Toujours vivant" VerticalAlignment="Center" 
                          Checked="ChkVivant_Checked" Unchecked="ChkVivant_Unchecked" Margin="0,0,10,5"/>
-                
-                <Button x:Name="btnAjouter" Grid.Row="0" Grid.Column="7" Content="Ajouter" Width="100" 
+
+        <Button x:Name="btnAjouter" Grid.Row="0" Grid.Column="7" Content="Ajouter" Width="100" 
                         Click="BtnAjouter_Click" Height="25" HorizontalAlignment="Left"/>
-                
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Description :" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <TextBox x:Name="txtDescription" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="6" 
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Description :" VerticalAlignment="Center" Margin="0,0,5,0"/>
+        <TextBox x:Name="txtDescription" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="6" 
                          Margin="0,0,10,0" Height="60" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
-            </Grid>
-        </GroupBox>
+      </Grid>
+    </GroupBox>
 
-        <!-- Ligne du temps -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" 
+    <!-- Ligne du temps -->
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" 
                      Margin="10,0,10,10" Background="#FFF8F8F8">
-            <Canvas x:Name="timelineCanvas" Height="300">
-                <!-- Ligne de temps -->
-                <Line x:Name="timeline" X1="50" Y1="150" X2="10000" Y2="150" 
+      <Canvas x:Name="timelineCanvas" Height="300">
+        <!-- Ligne de temps -->
+        <Line x:Name="timeline" X1="50" Y1="150" X2="10000" Y2="150" 
                       Stroke="Black" StrokeThickness="2" StrokeDashArray="5,5"/>
-                
-                <!-- Les marqueurs de temps seront ajoutés dynamiquement -->
-            </Canvas>
-        </ScrollViewer>
 
-        <!-- Barre d'outils -->
-        <StatusBar Grid.Row="2" Background="#FFE0E0E0">
-            <StatusBarItem>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Personnages : " FontWeight="Bold"/>
-                    <TextBlock x:Name="lblNbPersonnages" Text="0"/>
-                </StackPanel>
-            </StatusBarItem>
-            <Separator/>
-            <StatusBarItem HorizontalAlignment="Right">
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnExporterCSV" Content="Exporter CSV" Margin="5,0" 
-        Click="BtnExporterCSV_Click" Width="100" Height="25"/>
-<Button x:Name="btnImporterCSV" Content="Importer CSV" Margin="5,0" 
-        Click="BtnImporterCSV_Click" Width="100" Height="25"/>
-                    <Button x:Name="btnSauvegarder" Content="Sauvegarder" Margin="5,0" 
-                           Click="BtnSauvegarder_Click" Width="100" Height="25"/>
-                    <Button x:Name="btnCharger" Content="Charger" Margin="5,0" 
-                           Click="BtnCharger_Click" Width="100" Height="25"/>
-                </StackPanel>
-            </StatusBarItem>
-        </StatusBar>
-    </Grid>
+        <!-- Les marqueurs de temps seront ajoutés dynamiquement -->
+      </Canvas>
+    </ScrollViewer>
+
+    <!-- Barre d'outils -->
+    <StatusBar Grid.Row="2" Background="#FFE0E0E0">
+      <StatusBarItem>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Personnages : " FontWeight="Bold"/>
+          <TextBlock x:Name="lblNbPersonnages" Text="0" Margin="0,0,10,0"/>
+          <ComboBox x:Name="cbPersonnages" 
+                     Width="200" 
+                     Margin="5,0" 
+                     IsEditable="True" 
+                     IsTextSearchEnabled="True"
+                     SelectionChanged="CbPersonnages_SelectionChanged">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Nom}"/>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </StatusBarItem>
+      <Separator/>
+      <StatusBarItem HorizontalAlignment="Right">
+        <StackPanel Orientation="Horizontal">
+          <Button x:Name="btnExporterCSV" Content="Exporter CSV" Margin="5,0" 
+                    Click="BtnExporterCSV_Click" Width="100" Height="25"/>
+          <Button x:Name="btnImporterCSV" Content="Importer CSV" Margin="5,0" 
+                    Click="BtnImporterCSV_Click" Width="100" Height="25"/>
+          <Button x:Name="btnSauvegarder" Content="Sauvegarder" Margin="5,0" 
+                    Click="BtnSauvegarder_Click" Width="100" Height="25"/>
+          <Button x:Name="btnCharger" Content="Charger" Margin="5,0" 
+                    Click="BtnCharger_Click" Width="100" Height="25"/>
+        </StackPanel>
+      </StatusBarItem>
+    </StatusBar>
+  </Grid>
 </Window>
