@@ -22,18 +22,18 @@ namespace TimeTrackOfGeniuses
     public MainWindow()
     {
       InitializeComponent();
-    personnages = new ObservableCollection<PersonnageHistorique>();
-    personnages.CollectionChanged += (s, e) => MettreAJourAffichage();
-    
-    // Initialiser les contrôles
-    dpNaissance.SelectedDate = DateTime.Today;
-    dpDeces.SelectedDate = DateTime.Today;
-    
-    // Charger les données si elles existent
-    ChargerDonnees();
-    
-    // Initialiser la ComboBox
-    MettreAJourListePersonnages();
+      personnages = new ObservableCollection<PersonnageHistorique>();
+      personnages.CollectionChanged += (s, e) => MettreAJourAffichage();
+
+      // Initialiser les contrôles
+      dpNaissance.SelectedDate = DateTime.Today;
+      dpDeces.SelectedDate = DateTime.Today;
+
+      // Charger les données si elles existent
+      ChargerDonnees();
+
+      // Initialiser la ComboBox
+      MettreAJourListePersonnages();
     }
 
     private void BtnAjouter_Click(object sender, RoutedEventArgs e)
@@ -88,12 +88,12 @@ namespace TimeTrackOfGeniuses
       txtNom.Focus();
     }
 
-private void MettreAJourAffichage()
-{
-    lblNbPersonnages.Text = personnages.Count.ToString();
-    MettreAJourListePersonnages();
-    DessinerLigneDuTemps();
-}
+    private void MettreAJourAffichage()
+    {
+      lblNbPersonnages.Text = personnages.Count.ToString();
+      MettreAJourListePersonnages();
+      DessinerLigneDuTemps();
+    }
 
     private void DessinerLigneDuTemps()
     {
@@ -406,71 +406,71 @@ private void MettreAJourAffichage()
       return result.ToArray();
     }
 
-private void MettreAJourListePersonnages()
-{
-    // Sauvegarder la sélection actuelle
-    var selected = cbPersonnages.SelectedItem as PersonnageHistorique;
-    
-    // Mettre à jour la source de la ComboBox
-    cbPersonnages.ItemsSource = null;
-    cbPersonnages.ItemsSource = personnages;
-    
-    // Supprimer la ligne suivante car nous utilisons un ItemTemplate
-    // cbPersonnages.DisplayMemberPath = "Nom";
-    
-    // Restaurer la sélection si possible
-    if (selected != null)
+    private void MettreAJourListePersonnages()
     {
-        cbPersonnages.SelectedItem = personnages.FirstOrDefault(p => 
-            p.Nom == selected.Nom && 
-            p.DateNaissance == selected.DateNaissance);
-    }
-}
+      // Sauvegarder la sélection actuelle
+      var selected = cbPersonnages.SelectedItem as PersonnageHistorique;
 
-private void CbPersonnages_SelectionChanged(object sender, SelectionChangedEventArgs e)
-{
-    if (cbPersonnages.SelectedItem is PersonnageHistorique personnage)
+      // Mettre à jour la source de la ComboBox
+      cbPersonnages.ItemsSource = null;
+      cbPersonnages.ItemsSource = personnages;
+
+      // Supprimer la ligne suivante car nous utilisons un ItemTemplate
+      // cbPersonnages.DisplayMemberPath = "Nom";
+
+      // Restaurer la sélection si possible
+      if (selected != null)
+      {
+        cbPersonnages.SelectedItem = personnages.FirstOrDefault(p =>
+            p.Nom == selected.Nom &&
+            p.DateNaissance == selected.DateNaissance);
+      }
+    }
+
+    private void CbPersonnages_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+      if (cbPersonnages.SelectedItem is PersonnageHistorique personnage)
+      {
         // Faire défiler jusqu'au personnage sélectionné
         FaireDefilerVersPersonnage(personnage);
+      }
     }
-}
 
-private void FaireDefilerVersPersonnage(PersonnageHistorique personnage)
-{
-    if (personnage == null || !personnages.Any()) return;
-
-    // Calculer la position X du personnage sur la timeline
-    int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
-    double xPosition = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
-
-    // Faire défiler la ScrollViewer jusqu'à cette position
-    var scrollViewer = FindVisualChild<ScrollViewer>(timelineCanvas.Parent as FrameworkElement);
-    if (scrollViewer != null)
+    private void FaireDefilerVersPersonnage(PersonnageHistorique personnage)
     {
+      if (personnage == null || !personnages.Any()) return;
+
+      // Calculer la position X du personnage sur la timeline
+      int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
+      double xPosition = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
+
+      // Faire défiler la ScrollViewer jusqu'à cette position
+      var scrollViewer = FindVisualChild<ScrollViewer>(timelineCanvas.Parent as FrameworkElement);
+      if (scrollViewer != null)
+      {
         // Calculer la position de défilement pour centrer le personnage
         double scrollPosition = xPosition - (scrollViewer.ViewportWidth / 2);
         scrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollPosition));
+      }
     }
-}
 
-private static T FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
-{
-    if (depObj != null)
+    private static T FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
     {
+      if (depObj != null)
+      {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
         {
-            DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-            if (child != null && child is T)
-            {
-                return (T)child;
-            }
+          DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+          if (child != null && child is T)
+          {
+            return (T)child;
+          }
 
-            T childItem = FindVisualChild<T>(child);
-            if (childItem != null) return childItem;
+          T childItem = FindVisualChild<T>(child);
+          if (childItem != null) return childItem;
         }
+      }
+      return null;
     }
-    return null;
-}
   }
 }
