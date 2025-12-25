@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using TimeTrackOfGeniuses.Models;
+using System.Windows.Data;
 
 namespace TimeTrackOfGeniuses
 {
@@ -407,70 +408,112 @@ namespace TimeTrackOfGeniuses
     }
 
     private void MettreAJourListePersonnages()
+{
+    // Sauvegarder la sélection actuelle
+    var selected = cbPersonnages.SelectedItem as PersonnageHistorique;
+    
+    // Mettre à jour la source de la ComboBox
+    if (cbPersonnages.ItemsSource == null)
     {
-      // Sauvegarder la sélection actuelle
-      var selected = cbPersonnages.SelectedItem as PersonnageHistorique;
-
-      // Mettre à jour la source de la ComboBox
-      cbPersonnages.ItemsSource = null;
-      cbPersonnages.ItemsSource = personnages;
-
-      // Supprimer la ligne suivante car nous utilisons un ItemTemplate
-      // cbPersonnages.DisplayMemberPath = "Nom";
-
-      // Restaurer la sélection si possible
-      if (selected != null)
-      {
-        cbPersonnages.SelectedItem = personnages.FirstOrDefault(p =>
-            p.Nom == selected.Nom &&
-            p.DateNaissance == selected.DateNaissance);
-      }
+        cbPersonnages.ItemsSource = personnages;
     }
+    else
+    {
+        // Utiliser un ICollectionView pour rafraîchir la vue sans réinitialiser la source
+        var view = CollectionViewSource.GetDefaultView(cbPersonnages.ItemsSource);
+        view.Refresh();
+    }
+
+    // Restaurer la sélection si possible
+    if (selected != null)
+    {
+        var existingItem = personnages.FirstOrDefault(p => 
+            p.Nom == selected.Nom && 
+            p.DateNaissance == selected.DateNaissance);
+            
+        if (existingItem != null)
+        {
+            cbPersonnages.SelectedItem = existingItem;
+        }
+    }
+}
 
     private void CbPersonnages_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      if (cbPersonnages.SelectedItem is PersonnageHistorique personnage)
-      {
+      if (e.AddedItems.Count > 0 && e.AddedItems[0] is PersonnageHistorique personnage)
+    {
         // Faire défiler jusqu'au personnage sélectionné
         FaireDefilerVersPersonnage(personnage);
-      }
+    }
     }
 
-    private void FaireDefilerVersPersonnage(PersonnageHistorique personnage)
+   private void FaireDefilerVersPersonnage(PersonnageHistorique personnage)
+{
+    if (personnage == null || !personnages.Any()) return;
+
+    try
     {
-      if (personnage == null || !personnages.Any()) return;
+        // Calculer la position X du personnage sur la timeline
+        int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
+        double xPosition = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
 
-      // Calculer la position X du personnage sur la timeline
-      int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
-      double xPosition = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
+        // Trouver le ScrollViewer parent du timelineCanvas
+        var scrollViewer = FindVisualParent<ScrollViewer>(timelineCanvas);
+        if (scrollViewer == null) 
+        {
+            // Si on ne trouve pas de ScrollViewer, essayer de le trouver dans l'arborescence visuelle
+            scrollViewer = FindVisualChild<ScrollViewer>(this);
+            if (scrollViewer == null) return;
+        }
 
-      // Faire défiler la ScrollViewer jusqu'à cette position
-      var scrollViewer = FindVisualChild<ScrollViewer>(timelineCanvas.Parent as FrameworkElement);
-      if (scrollViewer != null)
-      {
         // Calculer la position de défilement pour centrer le personnage
         double scrollPosition = xPosition - (scrollViewer.ViewportWidth / 2);
         scrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollPosition));
-      }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erreur lors du défilement : {ex.Message}");
+    }
+}
+
+
+// Méthode utilitaire pour trouver un parent d'un type spécifique
+private static T GetVisualParent<T>(DependencyObject child) where T : DependencyObject
+{
+    while (child != null && !(child is T))
+    {
+        child = VisualTreeHelper.GetParent(child);
+    }
+    return child as T;
+}
 
     private static T FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
-    {
-      if (depObj != null)
-      {
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-        {
-          DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-          if (child != null && child is T)
-          {
-            return (T)child;
-          }
+{
+    if (depObj == null) return null;
 
-          T childItem = FindVisualChild<T>(child);
-          if (childItem != null) return childItem;
-        }
-      }
-      return null;
+    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+    {
+        var child = VisualTreeHelper.GetChild(depObj, i);
+        if (child is T result)
+            return result;
+
+        var childItem = FindVisualChild<T>(child);
+        if (childItem != null) 
+            return childItem;
     }
+    return null;
+}
+
+private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+{
+    var parentObject = VisualTreeHelper.GetParent(child);
+    if (parentObject == null) 
+        return null;
+
+    if (parentObject is T parent)
+        return parent;
+
+    return FindVisualParent<T>(parentObject);
+}
   }
 }

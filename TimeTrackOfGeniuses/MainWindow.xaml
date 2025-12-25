@@ -60,9 +60,12 @@
     </GroupBox>
 
     <!-- Ligne du temps -->
-    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" 
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto" 
                      Margin="10,0,10,10" Background="#FFF8F8F8">
-      <Canvas x:Name="timelineCanvas" Height="300">
+      <Canvas x:Name="timelineCanvas" 
+            Width="2000" 
+            Height="400" 
+            Background="White">
         <!-- Ligne de temps -->
         <Line x:Name="timeline" X1="50" Y1="150" X2="10000" Y2="150" 
                       Stroke="Black" StrokeThickness="2" StrokeDashArray="5,5"/>
