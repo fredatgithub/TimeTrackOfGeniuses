@@ -41,8 +41,7 @@ namespace TimeTrackOfGeniuses
     {
       if (string.IsNullOrWhiteSpace(txtNom.Text) || dpNaissance.SelectedDate == null)
       {
-        MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom et Date de naissance).",
-            "Champs manquants", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom et Date de naissance).", "Champs manquants", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
@@ -51,8 +50,7 @@ namespace TimeTrackOfGeniuses
 
       if (dateDeces.HasValue && dateDeces.Value < dateNaissance)
       {
-        MessageBox.Show("La date de décès ne peut pas être antérieure à la date de naissance.",
-            "Erreur de date", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show("La date de décès ne peut pas être antérieure à la date de naissance.", "Erreur de date", MessageBoxButton.OK, MessageBoxImage.Error);
         return;
       }
 
@@ -121,6 +119,7 @@ namespace TimeTrackOfGeniuses
         StrokeThickness = 2,
         StrokeDashArray = new DoubleCollection(new double[] { 5, 5 })
       };
+
       timelineCanvas.Children.Add(ligneTemps);
 
       // Liste pour suivre les positions Y utilisées
@@ -140,6 +139,7 @@ namespace TimeTrackOfGeniuses
           Stroke = Brushes.Black,
           StrokeThickness = 1
         };
+
         timelineCanvas.Children.Add(marqueur);
 
         // Étiquette d'année
@@ -149,6 +149,7 @@ namespace TimeTrackOfGeniuses
           Margin = new Thickness(x - 15, 70, 0, 0),
           FontSize = 10
         };
+
         timelineCanvas.Children.Add(txtAnnee);
       }
 
@@ -199,6 +200,7 @@ namespace TimeTrackOfGeniuses
           StrokeThickness = 1,
           StrokeDashArray = new DoubleCollection(new double[] { 2, 2 })
         };
+
         timelineCanvas.Children.Add(lignePointillee);
 
         // Nom du personnage
@@ -212,6 +214,7 @@ namespace TimeTrackOfGeniuses
                      $"Décédé le: {(personnage.DateMort.HasValue ? personnage.DateMort.Value.ToString("dd/MM/yyyy") : "Toujours vivant")}\n" +
                      $"{personnage.Description}"
         };
+
         timelineCanvas.Children.Add(txtNom);
       }
 
@@ -237,6 +240,7 @@ namespace TimeTrackOfGeniuses
         StrokeThickness = 2,
         ToolTip = $"{personnage.Nom}\n({personnage.DateNaissance.Year} - {(personnage.DateMort.HasValue ? personnage.DateMort.Value.Year.ToString() : "présent")})"
       };
+
       timelineCanvas.Children.Add(ligneVie);
 
       // Point de naissance
@@ -249,6 +253,7 @@ namespace TimeTrackOfGeniuses
         StrokeThickness = 1,
         ToolTip = $"Naissance: {personnage.Nom} ({personnage.DateNaissance:d})"
       };
+
       Canvas.SetLeft(pointNaissance, xNaissance - 5);
       Canvas.SetTop(pointNaissance, 145);
       timelineCanvas.Children.Add(pointNaissance);
@@ -265,6 +270,7 @@ namespace TimeTrackOfGeniuses
           StrokeThickness = 1,
           ToolTip = $"Décès: {personnage.Nom} ({personnage.DateMort.Value:d})"
         };
+
         Canvas.SetLeft(pointDeces, xFin - 5);
         Canvas.SetTop(pointDeces, 145);
         timelineCanvas.Children.Add(pointDeces);
@@ -297,13 +303,11 @@ namespace TimeTrackOfGeniuses
           BinaryFormatter formatter = new BinaryFormatter();
           formatter.Serialize(fs, personnages.ToList());
         }
-        MessageBox.Show("Données sauvegardées avec succès.", "Sauvegarde réussie",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show("Données sauvegardées avec succès.", "Sauvegarde réussie", MessageBoxButton.OK, MessageBoxImage.Information);
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de la sauvegarde : {ex.Message}",
-            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur lors de la sauvegarde : {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -323,19 +327,15 @@ namespace TimeTrackOfGeniuses
               personnages.Add(item);
             }
           }
-          MessageBox.Show("Données chargées avec succès.", "Chargement réussi",
-              MessageBoxButton.OK, MessageBoxImage.Information);
         }
         else
         {
-          MessageBox.Show("Aucune donnée sauvegardée trouvée.", "Information",
-              MessageBoxButton.OK, MessageBoxImage.Information);
+          MessageBox.Show("Aucune donnée sauvegardée trouvée.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
         }
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors du chargement : {ex.Message}",
-            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur lors du chargement : {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -377,10 +377,9 @@ namespace TimeTrackOfGeniuses
               MessageBoxButton.OK, MessageBoxImage.Information);
         }
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de l'export CSV : {ex.Message}",
-            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur lors de l'export CSV : {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -420,10 +419,9 @@ namespace TimeTrackOfGeniuses
                   nbPersonnagesAjoutes++;
                 }
               }
-              catch (Exception ex)
+              catch (Exception exception)
               {
-                MessageBox.Show($"Erreur lors de la lecture de la ligne : {line}\n\n{ex.Message}",
-                    "Erreur de format", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Erreur lors de la lecture de la ligne : {line}\n\n{exception.Message}", "Erreur de format", MessageBoxButton.OK, MessageBoxImage.Warning);
               }
             }
           }
@@ -433,10 +431,9 @@ namespace TimeTrackOfGeniuses
                         "Importation réussie", MessageBoxButton.OK, MessageBoxImage.Information);
         }
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de l'import CSV : {ex.Message}",
-            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur lors de l'import CSV : {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -540,7 +537,6 @@ namespace TimeTrackOfGeniuses
       }
     }
 
-
     // Méthode utilitaire pour trouver un parent d'un type spécifique
     private static T GetVisualParent<T>(DependencyObject child) where T : DependencyObject
     {
@@ -554,28 +550,25 @@ namespace TimeTrackOfGeniuses
     private static T FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
     {
       if (depObj == null) return null;
-
-      for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+      var counter = VisualTreeHelper.GetChildrenCount(depObj);
+      for (int i = 0; i < counter; i++)
       {
         var child = VisualTreeHelper.GetChild(depObj, i);
-        if (child is T result)
-          return result;
+        if (child is T result) return result;
 
         var childItem = FindVisualChild<T>(child);
-        if (childItem != null)
-          return childItem;
+        if (childItem != null) return childItem;
       }
+
       return null;
     }
 
     private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
     {
       var parentObject = VisualTreeHelper.GetParent(child);
-      if (parentObject == null)
-        return null;
+      if (parentObject == null) return null;
 
-      if (parentObject is T parent)
-        return parent;
+      if (parentObject is T parent) return parent;
 
       return FindVisualParent<T>(parentObject);
     }
