@@ -7,10 +7,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using TimeTrackOfGeniuses.Models;
-using System.Windows.Data;
 
 namespace TimeTrackOfGeniuses
 {
@@ -102,57 +102,121 @@ namespace TimeTrackOfGeniuses
 
       if (!personnages.Any()) return;
 
-      // Trouver la plage de dates
+      // Trier les personnages par date de naissance
+      var personnagesTries = personnages.OrderBy(p => p.DateNaissance).ToList();
       int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
-      int anneeMax = DateTime.Now.Year + 5;
+      int anneeMax = Math.Max(DateTime.Now.Year, personnages.Max(p => p.DateMort?.Year ?? p.DateNaissance.Year)) + 5;
+
+      // Ajuster la largeur du canvas
+      timelineCanvas.Width = 100 + (anneeMax - anneeMin) * PIXELS_PAR_ANNEE;
 
       // Dessiner la ligne de temps
-      Line timeline = new Line
+      Line ligneTemps = new Line
       {
         X1 = 50,
-        Y1 = 150,
+        Y1 = 100,
         X2 = 50 + (anneeMax - anneeMin) * PIXELS_PAR_ANNEE,
-        Y2 = 150,
+        Y2 = 100,
         Stroke = Brushes.Black,
         StrokeThickness = 2,
-        StrokeDashArray = new DoubleCollection() { 5, 5 }
+        StrokeDashArray = new DoubleCollection(new double[] { 5, 5 })
       };
-      timelineCanvas.Children.Add(timeline);
+      timelineCanvas.Children.Add(ligneTemps);
 
-      // Ajouter les marqueurs d'année
+      // Liste pour suivre les positions Y utilisées
+      List<double> yPositions = new List<double>();
+
+      // Dessiner les marqueurs et les noms
       for (int annee = anneeMin; annee <= anneeMax; annee += 10)
       {
         double x = 50 + (annee - anneeMin) * PIXELS_PAR_ANNEE;
 
-        // Ligne de repère
+        // Marqueur d'année
         Line marqueur = new Line
         {
           X1 = x,
-          Y1 = 145,
-          X2 = x,
-          Y2 = 155,
+          Y1 = 95,
+          Y2 = 105,
           Stroke = Brushes.Black,
           StrokeThickness = 1
         };
         timelineCanvas.Children.Add(marqueur);
 
-        // Étiquette de l'année
-        TextBlock texteAnnee = new TextBlock
+        // Étiquette d'année
+        TextBlock txtAnnee = new TextBlock
         {
           Text = annee.ToString(),
-          Margin = new Thickness(x - 15, 160, 0, 0)
+          Margin = new Thickness(x - 15, 70, 0, 0),
+          FontSize = 10
         };
-        timelineCanvas.Children.Add(texteAnnee);
+        timelineCanvas.Children.Add(txtAnnee);
       }
 
-      // Ajouter les personnages
-      foreach (var personnage in personnages)
+      // Dessiner les personnages
+      foreach (var personnage in personnagesTries)
       {
-        AjouterPersonnageSurLigneDuTemps(personnage, anneeMin);
+        double x = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
+
+        // Vérifier que la position X est valide
+        if (x < 50) continue; // Ne pas afficher si en dehors à gauche
+        if (x > timelineCanvas.Width) continue; // Ne pas afficher si en dehors à droite
+
+        // Trouver une position Y disponible
+        double y = 120; // Position de départ au-dessus de la ligne
+        bool positionTrouvee = false;
+
+        while (!positionTrouvee)
+        {
+          bool chevauchement = false;
+          foreach (var yPos in yPositions)
+          {
+            if (Math.Abs(y - yPos) < 25) // 25 pixels d'espacement minimum
+            {
+              chevauchement = true;
+              break;
+            }
+          }
+
+          if (!chevauchement)
+          {
+            positionTrouvee = true;
+            yPositions.Add(y);
+          }
+          else
+          {
+            y += 25; // Espacement entre les lignes
+          }
+        }
+
+        // Ligne pointillée vers la ligne de temps
+        Line lignePointillee = new Line
+        {
+          X1 = x,
+          Y1 = 100,  // Point sur la ligne de temps
+          X2 = x,
+          Y2 = y - 15,  // Juste en dessous du nom
+          Stroke = Brushes.Gray,
+          StrokeThickness = 1,
+          StrokeDashArray = new DoubleCollection(new double[] { 2, 2 })
+        };
+        timelineCanvas.Children.Add(lignePointillee);
+
+        // Nom du personnage
+        TextBlock txtNom = new TextBlock
+        {
+          Text = personnage.Nom,
+          Margin = new Thickness(x + 5, y - 25, 0, 0),
+          FontWeight = FontWeights.Bold,
+          ToolTip = $"{personnage.Nom}\n" +
+                     $"Né le: {personnage.DateNaissance:dd/MM/yyyy}\n" +
+                     $"Décédé le: {(personnage.DateMort.HasValue ? personnage.DateMort.Value.ToString("dd/MM/yyyy") : "Toujours vivant")}\n" +
+                     $"{personnage.Description}"
+        };
+        timelineCanvas.Children.Add(txtNom);
       }
 
-      // Ajuster la taille du canvas
-      timelineCanvas.Width = 50 + (anneeMax - anneeMin) * PIXELS_PAR_ANNEE + 50;
+      // Ajuster la hauteur du canvas en fonction du contenu
+      timelineCanvas.Height = yPositions.Any() ? yPositions.Max() + 30 : 200;
     }
 
     private void AjouterPersonnageSurLigneDuTemps(PersonnageHistorique personnage, int anneeMin)
@@ -408,112 +472,112 @@ namespace TimeTrackOfGeniuses
     }
 
     private void MettreAJourListePersonnages()
-{
-    // Sauvegarder la sélection actuelle
-    var selected = cbPersonnages.SelectedItem as PersonnageHistorique;
-    
-    // Mettre à jour la source de la ComboBox
-    if (cbPersonnages.ItemsSource == null)
     {
+      // Sauvegarder la sélection actuelle
+      var selected = cbPersonnages.SelectedItem as PersonnageHistorique;
+
+      // Mettre à jour la source de la ComboBox
+      if (cbPersonnages.ItemsSource == null)
+      {
         cbPersonnages.ItemsSource = personnages;
-    }
-    else
-    {
+      }
+      else
+      {
         // Utiliser un ICollectionView pour rafraîchir la vue sans réinitialiser la source
         var view = CollectionViewSource.GetDefaultView(cbPersonnages.ItemsSource);
         view.Refresh();
-    }
+      }
 
-    // Restaurer la sélection si possible
-    if (selected != null)
-    {
-        var existingItem = personnages.FirstOrDefault(p => 
-            p.Nom == selected.Nom && 
+      // Restaurer la sélection si possible
+      if (selected != null)
+      {
+        var existingItem = personnages.FirstOrDefault(p =>
+            p.Nom == selected.Nom &&
             p.DateNaissance == selected.DateNaissance);
-            
+
         if (existingItem != null)
         {
-            cbPersonnages.SelectedItem = existingItem;
+          cbPersonnages.SelectedItem = existingItem;
         }
+      }
     }
-}
 
     private void CbPersonnages_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (e.AddedItems.Count > 0 && e.AddedItems[0] is PersonnageHistorique personnage)
-    {
+      {
         // Faire défiler jusqu'au personnage sélectionné
         FaireDefilerVersPersonnage(personnage);
-    }
+      }
     }
 
-   private void FaireDefilerVersPersonnage(PersonnageHistorique personnage)
-{
-    if (personnage == null || !personnages.Any()) return;
-
-    try
+    private void FaireDefilerVersPersonnage(PersonnageHistorique personnage)
     {
+      if (personnage == null || !personnages.Any()) return;
+
+      try
+      {
         // Calculer la position X du personnage sur la timeline
         int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
         double xPosition = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
 
         // Trouver le ScrollViewer parent du timelineCanvas
         var scrollViewer = FindVisualParent<ScrollViewer>(timelineCanvas);
-        if (scrollViewer == null) 
+        if (scrollViewer == null)
         {
-            // Si on ne trouve pas de ScrollViewer, essayer de le trouver dans l'arborescence visuelle
-            scrollViewer = FindVisualChild<ScrollViewer>(this);
-            if (scrollViewer == null) return;
+          // Si on ne trouve pas de ScrollViewer, essayer de le trouver dans l'arborescence visuelle
+          scrollViewer = FindVisualChild<ScrollViewer>(this);
+          if (scrollViewer == null) return;
         }
 
         // Calculer la position de défilement pour centrer le personnage
         double scrollPosition = xPosition - (scrollViewer.ViewportWidth / 2);
         scrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollPosition));
-    }
-    catch (Exception ex)
-    {
+      }
+      catch (Exception ex)
+      {
         Console.WriteLine($"Erreur lors du défilement : {ex.Message}");
+      }
     }
-}
 
 
-// Méthode utilitaire pour trouver un parent d'un type spécifique
-private static T GetVisualParent<T>(DependencyObject child) where T : DependencyObject
-{
-    while (child != null && !(child is T))
+    // Méthode utilitaire pour trouver un parent d'un type spécifique
+    private static T GetVisualParent<T>(DependencyObject child) where T : DependencyObject
     {
+      while (child != null && !(child is T))
+      {
         child = VisualTreeHelper.GetParent(child);
+      }
+      return child as T;
     }
-    return child as T;
-}
 
     private static T FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
-{
-    if (depObj == null) return null;
-
-    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
     {
+      if (depObj == null) return null;
+
+      for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+      {
         var child = VisualTreeHelper.GetChild(depObj, i);
         if (child is T result)
-            return result;
+          return result;
 
         var childItem = FindVisualChild<T>(child);
-        if (childItem != null) 
-            return childItem;
+        if (childItem != null)
+          return childItem;
+      }
+      return null;
     }
-    return null;
-}
 
-private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
-{
-    var parentObject = VisualTreeHelper.GetParent(child);
-    if (parentObject == null) 
+    private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+    {
+      var parentObject = VisualTreeHelper.GetParent(child);
+      if (parentObject == null)
         return null;
 
-    if (parentObject is T parent)
+      if (parentObject is T parent)
         return parent;
 
-    return FindVisualParent<T>(parentObject);
-}
+      return FindVisualParent<T>(parentObject);
+    }
   }
 }
