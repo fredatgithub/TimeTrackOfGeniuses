@@ -82,6 +82,10 @@
             <Separator/>
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btnExporterCSV" Content="Exporter CSV" Margin="5,0" 
+        Click="BtnExporterCSV_Click" Width="100" Height="25"/>
+<Button x:Name="btnImporterCSV" Content="Importer CSV" Margin="5,0" 
+        Click="BtnImporterCSV_Click" Width="100" Height="25"/>
                     <Button x:Name="btnSauvegarder" Content="Sauvegarder" Margin="5,0" 
                            Click="BtnSauvegarder_Click" Width="100" Height="25"/>
                     <Button x:Name="btnCharger" Content="Charger" Margin="5,0" 
