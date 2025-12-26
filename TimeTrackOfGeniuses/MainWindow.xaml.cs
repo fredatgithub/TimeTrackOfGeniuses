@@ -108,7 +108,7 @@ namespace TimeTrackOfGeniuses
       // Ajuster la largeur du canvas
       timelineCanvas.Width = 100 + (anneeMax - anneeMin) * PIXELS_PAR_ANNEE;
 
-      // Dessiner la ligne de temps
+      // Dessiner la ligne de temps principale
       Line ligneTemps = new Line
       {
         X1 = 50,
@@ -119,13 +119,12 @@ namespace TimeTrackOfGeniuses
         StrokeThickness = 2,
         StrokeDashArray = new DoubleCollection(new double[] { 5, 5 })
       };
-
       timelineCanvas.Children.Add(ligneTemps);
 
       // Liste pour suivre les positions Y utilisées
       List<double> yPositions = new List<double>();
 
-      // Dessiner les marqueurs et les noms
+      // Dessiner les marqueurs d'année
       for (int annee = anneeMin; annee <= anneeMax; annee += 10)
       {
         double x = 50 + (annee - anneeMin) * PIXELS_PAR_ANNEE;
@@ -139,7 +138,6 @@ namespace TimeTrackOfGeniuses
           Stroke = Brushes.Black,
           StrokeThickness = 1
         };
-
         timelineCanvas.Children.Add(marqueur);
 
         // Étiquette d'année
@@ -149,18 +147,23 @@ namespace TimeTrackOfGeniuses
           Margin = new Thickness(x - 15, 70, 0, 0),
           FontSize = 10
         };
-
         timelineCanvas.Children.Add(txtAnnee);
       }
+
+      // Couleurs aléatoires pour chaque personnage
+      Random rnd = new Random();
 
       // Dessiner les personnages
       foreach (var personnage in personnagesTries)
       {
-        double x = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
+        double xNaissance = 50 + (personnage.DateNaissance.Year - anneeMin) * PIXELS_PAR_ANNEE;
+        double xMort = personnage.DateMort.HasValue
+            ? 50 + (personnage.DateMort.Value.Year - anneeMin) * PIXELS_PAR_ANNEE
+            : 50 + (DateTime.Now.Year - anneeMin) * PIXELS_PAR_ANNEE;
 
-        // Vérifier que la position X est valide
-        if (x < 50) continue; // Ne pas afficher si en dehors à gauche
-        if (x > timelineCanvas.Width) continue; // Ne pas afficher si en dehors à droite
+        // Vérifier que les positions X sont valides
+        if (xNaissance < 50 || xMort < 50) continue;
+        if (xNaissance > timelineCanvas.Width && xMort > timelineCanvas.Width) continue;
 
         // Trouver une position Y disponible
         double y = 120; // Position de départ au-dessus de la ligne
@@ -189,32 +192,71 @@ namespace TimeTrackOfGeniuses
           }
         }
 
-        // Ligne pointillée vers la ligne de temps
-        Line lignePointillee = new Line
+        // Générer une couleur aléatoire pour ce personnage
+        Color couleur = Color.FromRgb(
+            (byte)rnd.Next(50, 200),
+            (byte)rnd.Next(50, 200),
+            (byte)rnd.Next(50, 200)
+        );
+
+        // Ligne de vie (entre naissance et mort)
+        if (personnage.DateMort.HasValue || xNaissance != xMort)
         {
-          X1 = x,
-          Y1 = 100,  // Point sur la ligne de temps
-          X2 = x,
-          Y2 = y - 15,  // Juste en dessous du nom
-          Stroke = Brushes.Gray,
+          Line ligneVie = new Line
+          {
+            X1 = xNaissance,
+            Y1 = y - 10,
+            X2 = xMort,
+            Y2 = y - 10,
+            Stroke = new SolidColorBrush(couleur),
+            StrokeThickness = 3,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round
+          };
+          timelineCanvas.Children.Add(ligneVie);
+        }
+
+        // Ligne pointillée à la naissance
+        Line ligneNaissance = new Line
+        {
+          X1 = xNaissance,
+          Y1 = 95,
+          X2 = xNaissance,
+          Y2 = y - 10,
+          Stroke = new SolidColorBrush(couleur),
           StrokeThickness = 1,
           StrokeDashArray = new DoubleCollection(new double[] { 2, 2 })
         };
+        timelineCanvas.Children.Add(ligneNaissance);
 
-        timelineCanvas.Children.Add(lignePointillee);
+        // Ligne pointillée à la mort (si décédé)
+        if (personnage.DateMort.HasValue)
+        {
+          Line ligneMort = new Line
+          {
+            X1 = xMort,
+            Y1 = 95,
+            X2 = xMort,
+            Y2 = y - 10,
+            Stroke = new SolidColorBrush(couleur),
+            StrokeThickness = 1,
+            StrokeDashArray = new DoubleCollection(new double[] { 2, 2 })
+          };
+          timelineCanvas.Children.Add(ligneMort);
+        }
 
         // Nom du personnage
         TextBlock txtNom = new TextBlock
         {
           Text = personnage.Nom,
-          Margin = new Thickness(x + 5, y - 25, 0, 0),
+          Margin = new Thickness(xNaissance + 5, y - 30, 0, 0),
           FontWeight = FontWeights.Bold,
+          Foreground = new SolidColorBrush(Colors.Black),
           ToolTip = $"{personnage.Nom}\n" +
                      $"Né le: {personnage.DateNaissance:dd/MM/yyyy}\n" +
                      $"Décédé le: {(personnage.DateMort.HasValue ? personnage.DateMort.Value.ToString("dd/MM/yyyy") : "Toujours vivant")}\n" +
                      $"{personnage.Description}"
         };
-
         timelineCanvas.Children.Add(txtNom);
       }
 
