@@ -9,7 +9,7 @@
         Title="Ligne du Temps des Génies" 
         Height="700" 
         Width="1200"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="Manual">
   <Window.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
   </Window.Resources>

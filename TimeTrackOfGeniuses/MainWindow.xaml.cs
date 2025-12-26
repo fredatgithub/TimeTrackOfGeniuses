@@ -16,6 +16,7 @@ namespace TimeTrackOfGeniuses
 {
   public partial class MainWindow : Window
   {
+    private const string WINDOW_SETTINGS_FILE = "window_settings.dat";
     private ObservableCollection<PersonnageHistorique> personnages;
     private const string FICHIER_SAUVEGARDE = "personnages.dat";
     private const int PIXELS_PAR_ANNEE = 10; // Échelle : 10 pixels = 1 an
@@ -30,11 +31,93 @@ namespace TimeTrackOfGeniuses
       dpNaissance.SelectedDate = DateTime.Today;
       dpDeces.SelectedDate = DateTime.Today;
 
+      // Charger les paramètres de la fenêtre
+      ChargerParametresFenetre();
+
       // Charger les données si elles existent
       ChargerDonnees();
 
       // Initialiser la ComboBox
       MettreAJourListePersonnages();
+
+      // S'abonner à l'événement de fermeture
+      this.Closing += MainWindow_Closing;
+    }
+
+    private void ChargerParametresFenetre()
+    {
+      if (File.Exists(WINDOW_SETTINGS_FILE))
+      {
+        try
+        {
+          using (Stream stream = File.OpenRead(WINDOW_SETTINGS_FILE))
+          {
+            BinaryFormatter formatter = new BinaryFormatter();
+            WindowSettings settings = (WindowSettings)formatter.Deserialize(stream);
+
+            this.Width = settings.Width;
+            this.Height = settings.Height;
+            this.Left = settings.Left;
+            this.Top = settings.Top;
+            this.WindowState = settings.WindowState;
+          }
+        }
+        catch (Exception ex)
+        {
+          Console.WriteLine($"Erreur lors du chargement des paramètres de la fenêtre : {ex.Message}");
+        }
+      }
+    }
+    private void SauvegarderParametresFenetre()
+    {
+      try
+      {
+        WindowSettings settings = new WindowSettings
+        {
+          Width = this.RestoreBounds.Width,
+          Height = this.RestoreBounds.Height,
+          Left = this.RestoreBounds.Left,
+          Top = this.RestoreBounds.Top,
+          WindowState = this.WindowState
+        };
+        using (Stream stream = File.Create(WINDOW_SETTINGS_FILE))
+        {
+          BinaryFormatter formatter = new BinaryFormatter();
+          formatter.Serialize(stream, settings);
+        }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {ex.Message}");
+      }
+    }
+
+    private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+      // Sauvegarder les paramètres de la fenêtre
+      SauvegarderParametresFenetre();
+
+      // Sauvegarder les données
+      SauvegarderDonnees();
+    }
+
+    private void SauvegarderDonnees()
+    {
+      try
+      {
+        using (FileStream fs = new FileStream(FICHIER_SAUVEGARDE, FileMode.Create))
+        {
+          BinaryFormatter formatter = new BinaryFormatter();
+          formatter.Serialize(fs, personnages.ToList());
+        }
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Erreur lors de la sauvegarde des données : {ex.Message}",
+                      "Erreur",
+                      MessageBoxButton.OK,
+                      MessageBoxImage.Error);
+      }
     }
 
     private void BtnAjouter_Click(object sender, RoutedEventArgs e)
@@ -385,7 +468,27 @@ namespace TimeTrackOfGeniuses
     {
       if (File.Exists(FICHIER_SAUVEGARDE))
       {
-        BtnCharger_Click(null, null);
+        try
+        {
+          using (FileStream fs = new FileStream(FICHIER_SAUVEGARDE, FileMode.Open))
+          {
+            BinaryFormatter formatter = new BinaryFormatter();
+            var donneesChargees = (List<PersonnageHistorique>)formatter.Deserialize(fs);
+
+            personnages.Clear();
+            foreach (var personnage in donneesChargees)
+            {
+              personnages.Add(personnage);
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show($"Erreur lors du chargement des données : {ex.Message}",
+                        "Erreur",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+        }
       }
     }
 
