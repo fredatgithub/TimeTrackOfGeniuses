@@ -51,8 +51,16 @@
 
         <Button x:Name="btnAjouter" Grid.Row="0" Grid.Column="7" Content="Ajouter" Width="100" 
                         Click="BtnAjouter_Click" Height="25" HorizontalAlignment="Left"/>
-        <Button x:Name="btnModifier" Content="Modifier" Click="BtnModifier_Click" Margin="138,5,0,0" 
+        <Button x:Name="btnModifier" Content="Modifier" Click="BtnModifier_Click" Margin="112,5,0,0" 
         Width="100" Height="25" IsEnabled="False" HorizontalAlignment="Left" Grid.Column="7"/>
+
+        <Button x:Name="btnSupprimer" Content="Supprimer" Click="BtnSupprimer_Click"
+        Margin="233,5,138,0" 
+        Width="100" 
+        Height="25"
+        IsEnabled="False"
+        Background="#FFE8A1A1"
+        Foreground="DarkRed" Grid.Column="7"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Description :" VerticalAlignment="Center" Margin="0,0,5,0"/>
         <TextBox x:Name="txtDescription" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="6" 

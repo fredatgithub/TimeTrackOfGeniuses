@@ -736,6 +736,7 @@ namespace TimeTrackOfGeniuses
     {
       _personnageSelectionne = personnage;
       btnModifier.IsEnabled = personnage != null;
+      btnSupprimer.IsEnabled = personnage != null;
 
       // Mettre à jour les champs du formulaire
       if (personnage != null)
@@ -786,11 +787,13 @@ namespace TimeTrackOfGeniuses
       _personnageSelectionne = null;
       btnAjouter.Content = "Ajouter";
       btnModifier.IsEnabled = false;
+      btnSupprimer.IsEnabled = false;
       txtNom.Text = string.Empty;
       dpNaissance.SelectedDate = DateTime.Today;
       dpDeces.SelectedDate = null;
       txtDescription.Text = string.Empty;
     }
+
     private void Personnage_MouseDown(object sender, MouseButtonEventArgs e)
     {
       if (e.ChangedButton == MouseButton.Left)
@@ -835,6 +838,24 @@ namespace TimeTrackOfGeniuses
 
       personnages.Add(personnage);
       ReinitialiserFormulaire();
+    }
+
+    private void BtnSupprimer_Click(object sender, RoutedEventArgs e)
+    {
+      if (_personnageSelectionne == null) return;
+
+      var result = MessageBox.Show(
+          $"Voulez-vous vraiment supprimer {_personnageSelectionne.Nom} ?",
+          "Confirmer la suppression",
+          MessageBoxButton.YesNo,
+          MessageBoxImage.Question);
+
+      if (result == MessageBoxResult.Yes)
+      {
+        personnages.Remove(_personnageSelectionne);
+        ReinitialiserFormulaire();
+        MettreAJourAffichage();
+      }
     }
   }
 }
