@@ -47,11 +47,12 @@
 
         <TextBlock Grid.Row="0" Grid.Column="4" Text="Décès :" VerticalAlignment="Center" Margin="0,0,5,5"/>
         <DatePicker x:Name="dpDeces" Grid.Row="0" Grid.Column="5" Margin="0,0,10,5" Height="25"/>
-        <CheckBox x:Name="chkVivant" Grid.Row="0" Grid.Column="6" Content="Toujours vivant" VerticalAlignment="Center" 
-                         Checked="ChkVivant_Checked" Unchecked="ChkVivant_Unchecked" Margin="0,0,10,5"/>
+        <CheckBox x:Name="chkVivant" Grid.Row="0" Grid.Column="6" Content="Toujours vivant" VerticalAlignment="Center" Checked="ChkVivant_Checked" Unchecked="ChkVivant_Unchecked" Margin="0,0,10,5"/>
 
         <Button x:Name="btnAjouter" Grid.Row="0" Grid.Column="7" Content="Ajouter" Width="100" 
                         Click="BtnAjouter_Click" Height="25" HorizontalAlignment="Left"/>
+        <Button x:Name="btnModifier" Content="Modifier" Click="BtnModifier_Click" Margin="138,5,0,0" 
+        Width="100" Height="25" IsEnabled="False" HorizontalAlignment="Left" Grid.Column="7"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Description :" VerticalAlignment="Center" Margin="0,0,5,0"/>
         <TextBox x:Name="txtDescription" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="6" 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using TimeTrackOfGeniuses.Models;
@@ -20,6 +21,9 @@ namespace TimeTrackOfGeniuses
     private ObservableCollection<PersonnageHistorique> personnages;
     private const string FICHIER_SAUVEGARDE = "personnages.dat";
     private const int PIXELS_PAR_ANNEE = 10; // Échelle : 10 pixels = 1 an
+
+    private PersonnageHistorique _personnageSelectionne;
+    private bool _enModeEdition = false;
 
     public MainWindow()
     {
@@ -122,30 +126,38 @@ namespace TimeTrackOfGeniuses
 
     private void BtnAjouter_Click(object sender, RoutedEventArgs e)
     {
-      if (string.IsNullOrWhiteSpace(txtNom.Text) || dpNaissance.SelectedDate == null)
+      // if (string.IsNullOrWhiteSpace(txtNom.Text) || dpNaissance.SelectedDate == null)
+      // {
+      //   MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom et Date de naissance).", "Champs manquants", MessageBoxButton.OK, MessageBoxImage.Warning);
+      //   return;
+      // }
+
+      // DateTime dateNaissance = dpNaissance.SelectedDate.Value;
+      // DateTime? dateDeces = chkVivant.IsChecked == true ? null : dpDeces.SelectedDate;
+
+      // if (dateDeces.HasValue && dateDeces.Value < dateNaissance)
+      // {
+      //   MessageBox.Show("La date de décès ne peut pas être antérieure à la date de naissance.", "Erreur de date", MessageBoxButton.OK, MessageBoxImage.Error);
+      //   return;
+      // }
+
+      // var personnage = new PersonnageHistorique(
+      //     txtNom.Text.Trim(),
+      //     dateNaissance,
+      //     dateDeces,
+      //     txtDescription.Text
+      // );
+
+      // personnages.Add(personnage);
+      // ReinitialiserFormulaire();
+      if (_enModeEdition)
       {
-        MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom et Date de naissance).", "Champs manquants", MessageBoxButton.OK, MessageBoxImage.Warning);
-        return;
+        ModifierPersonnage();
       }
-
-      DateTime dateNaissance = dpNaissance.SelectedDate.Value;
-      DateTime? dateDeces = chkVivant.IsChecked == true ? null : dpDeces.SelectedDate;
-
-      if (dateDeces.HasValue && dateDeces.Value < dateNaissance)
+      else
       {
-        MessageBox.Show("La date de décès ne peut pas être antérieure à la date de naissance.", "Erreur de date", MessageBoxButton.OK, MessageBoxImage.Error);
-        return;
+        AjouterPersonnage();
       }
-
-      var personnage = new PersonnageHistorique(
-          txtNom.Text.Trim(),
-          dateNaissance,
-          dateDeces,
-          txtDescription.Text
-      );
-
-      personnages.Add(personnage);
-      ReinitialiserFormulaire();
     }
 
     private void ChkVivant_Checked(object sender, RoutedEventArgs e)
@@ -158,16 +170,6 @@ namespace TimeTrackOfGeniuses
     {
       dpDeces.IsEnabled = true;
       dpDeces.SelectedDate = DateTime.Today;
-    }
-
-    private void ReinitialiserFormulaire()
-    {
-      txtNom.Clear();
-      dpNaissance.SelectedDate = DateTime.Today;
-      dpDeces.SelectedDate = DateTime.Today;
-      chkVivant.IsChecked = false;
-      txtDescription.Clear();
-      txtNom.Focus();
     }
 
     private void MettreAJourAffichage()
@@ -337,10 +339,20 @@ namespace TimeTrackOfGeniuses
           Margin = new Thickness(xNaissance + 5, y - 30, 0, 0),
           FontWeight = FontWeights.Bold,
           Foreground = new SolidColorBrush(Colors.Black),
+          Cursor = Cursors.Hand,
+          Tag = personnage,  // Stocker la référence au personnage
           ToolTip = $"{personnage.Nom}\n" +
-                     $"Né le: {personnage.DateNaissance:dd/MM/yyyy}\n" +
-                     $"Décédé le: {(personnage.DateMort.HasValue ? personnage.DateMort.Value.ToString("dd/MM/yyyy") : "Toujours vivant")}\n" +
-                     $"{personnage.Description}"
+             $"Né le: {personnage.DateNaissance:dd/MM/yyyy}\n" +
+             $"Décédé le: {(personnage.DateMort.HasValue ? personnage.DateMort.Value.ToString("dd/MM/yyyy") : "Toujours vivant")}\n" +
+             $"{personnage.Description}"
+        };
+        // Ajouter le gestionnaire d'événements
+        txtNom.MouseDown += (s, args) =>
+        {
+          if (args.ChangedButton == MouseButton.Left)
+          {
+            SelectionnerPersonnage(personnage);
+          }
         };
         timelineCanvas.Children.Add(txtNom);
       }
@@ -718,6 +730,111 @@ namespace TimeTrackOfGeniuses
       if (parentObject is T parent) return parent;
 
       return FindVisualParent<T>(parentObject);
+    }
+
+    private void SelectionnerPersonnage(PersonnageHistorique personnage)
+    {
+      _personnageSelectionne = personnage;
+      btnModifier.IsEnabled = personnage != null;
+
+      // Mettre à jour les champs du formulaire
+      if (personnage != null)
+      {
+        txtNom.Text = personnage.Nom;
+        dpNaissance.SelectedDate = personnage.DateNaissance;
+        dpDeces.SelectedDate = personnage.DateMort;
+        txtDescription.Text = personnage.Description;
+      }
+    }
+
+    private void BtnModifier_Click(object sender, RoutedEventArgs e)
+    {
+      if (_personnageSelectionne == null) return;
+
+      _enModeEdition = true;
+
+      // Mettre à jour l'interface
+      txtNom.Text = _personnageSelectionne.Nom;
+      dpNaissance.SelectedDate = _personnageSelectionne.DateNaissance;
+      dpDeces.SelectedDate = _personnageSelectionne.DateMort;
+      txtDescription.Text = _personnageSelectionne.Description;
+
+      btnAjouter.Content = "Enregistrer";
+      btnModifier.IsEnabled = false;
+    }
+
+    private void ModifierPersonnage()
+    {
+      if (_personnageSelectionne == null) return;
+
+      // Mettre à jour les propriétés
+      _personnageSelectionne.Nom = txtNom.Text;
+      _personnageSelectionne.DateNaissance = dpNaissance.SelectedDate ?? DateTime.Now;
+      _personnageSelectionne.DateMort = dpDeces.SelectedDate;
+      _personnageSelectionne.Description = txtDescription.Text;
+
+      // Mettre à jour l'affichage
+      MettreAJourAffichage();
+
+      // Réinitialiser l'interface
+      ReinitialiserFormulaire();
+    }
+
+    private void ReinitialiserFormulaire()
+    {
+      _enModeEdition = false;
+      _personnageSelectionne = null;
+      btnAjouter.Content = "Ajouter";
+      btnModifier.IsEnabled = false;
+      txtNom.Text = string.Empty;
+      dpNaissance.SelectedDate = DateTime.Today;
+      dpDeces.SelectedDate = null;
+      txtDescription.Text = string.Empty;
+    }
+    private void Personnage_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.ChangedButton == MouseButton.Left)
+      {
+        var textBlock = sender as TextBlock;
+        if (textBlock?.Tag is PersonnageHistorique personnage)
+        {
+          SelectionnerPersonnage(personnage);
+        }
+      }
+    }
+
+    private void AjouterPersonnage()
+    {
+      if (string.IsNullOrWhiteSpace(txtNom.Text) || dpNaissance.SelectedDate == null)
+      {
+        MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom et Date de naissance).",
+                      "Champs manquants",
+                      MessageBoxButton.OK,
+                      MessageBoxImage.Warning);
+        return;
+      }
+
+      DateTime dateNaissance = dpNaissance.SelectedDate.Value;
+      DateTime? dateDeces = chkVivant.IsChecked == true ? null : dpDeces.SelectedDate;
+
+      if (dateDeces.HasValue && dateDeces.Value < dateNaissance)
+      {
+        MessageBox.Show("La date de décès ne peut pas être antérieure à la date de naissance.",
+                      "Erreur de date",
+                      MessageBoxButton.OK,
+                      MessageBoxImage.Error);
+        return;
+      }
+
+      var personnage = new PersonnageHistorique(
+          txtNom.Text.Trim(),
+          dateNaissance,
+          dateDeces,
+          txtDescription.Text
+      );
+
+      personnages.Add(personnage);
+      ReinitialiserFormulaire();
     }
   }
 }
