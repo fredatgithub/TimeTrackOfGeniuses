@@ -336,7 +336,7 @@ namespace TimeTrackOfGeniuses
         TextBlock txtNom = new TextBlock
         {
           Text = personnage.Nom,
-          Margin = new Thickness(xNaissance + 5, y - 30, 0, 0),
+          Margin = new Thickness(xNaissance + 5, y + 2, 0, 0),
           FontWeight = FontWeights.Bold,
           Foreground = new SolidColorBrush(Colors.Black),
           Cursor = Cursors.Hand,
