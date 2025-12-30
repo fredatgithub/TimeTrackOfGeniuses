@@ -185,11 +185,12 @@ namespace TimeTrackOfGeniuses
 
       // Trier les personnages par date de naissance
       var personnagesTries = personnages.OrderBy(p => p.DateNaissance).ToList();
-      int anneeMin = personnages.Min(p => p.DateNaissance.Year) - 5;
-      int anneeMax = Math.Max(DateTime.Now.Year, personnages.Max(p => p.DateMort?.Year ?? p.DateNaissance.Year)) + 5;
-
-      // Ajuster la largeur du canvas
-      timelineCanvas.Width = 100 + (anneeMax - anneeMin) * PIXELS_PAR_ANNEE;
+      // Calculer les années min et max en tenant compte des dates anciennes
+int anneeMin = Math.Min(1000, personnages.Min(p => p.DateNaissance.Year) - 5);
+int anneeMax = Math.Max(DateTime.Now.Year + 5, personnages.Max(p => p.DateMort?.Year ?? p.DateNaissance.Year) + 5);
+// Ajuster la largeur du canvas
+double largeurTotale = (anneeMax - anneeMin) * PIXELS_PAR_ANNEE;
+timelineCanvas.Width = Math.Max(1000, largeurTotale + 100); // Largeur minimale de 1000 pixels
 
       // Dessiner la ligne de temps principale
       Line ligneTemps = new Line
@@ -199,8 +200,9 @@ namespace TimeTrackOfGeniuses
         X2 = 50 + (anneeMax - anneeMin) * PIXELS_PAR_ANNEE,
         Y2 = 100,
         Stroke = Brushes.Black,
-        StrokeThickness = 2,
-        StrokeDashArray = new DoubleCollection(new double[] { 5, 5 })
+        StrokeThickness = 5,  // 5 pixels de hauteur
+    StrokeStartLineCap = PenLineCap.Square,
+    StrokeEndLineCap = PenLineCap.Square
       };
       timelineCanvas.Children.Add(ligneTemps);
 
