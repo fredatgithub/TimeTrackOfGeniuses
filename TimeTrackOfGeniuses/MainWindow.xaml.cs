@@ -496,9 +496,9 @@ namespace TimeTrackOfGeniuses
             }
           }
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-          MessageBox.Show($"Erreur lors du chargement des données : {ex.Message}",
+          MessageBox.Show($"Erreur lors du chargement des données : {exception.Message}",
                         "Erreur",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
@@ -532,8 +532,7 @@ namespace TimeTrackOfGeniuses
           }
 
           File.WriteAllText(saveFileDialog.FileName, csv.ToString(), Encoding.UTF8);
-          MessageBox.Show("Export CSV réussi !", "Succès",
-              MessageBoxButton.OK, MessageBoxImage.Information);
+          MessageBox.Show("Export CSV réussi !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
         }
       }
       catch (Exception exception)
@@ -690,9 +689,9 @@ namespace TimeTrackOfGeniuses
         double scrollPosition = xPosition - (scrollViewer.ViewportWidth / 2);
         scrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollPosition));
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        Console.WriteLine($"Erreur lors du défilement : {ex.Message}");
+        Console.WriteLine($"Erreur lors du défilement : {exception.Message}");
       }
     }
 
