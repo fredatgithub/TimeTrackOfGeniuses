@@ -843,8 +843,7 @@ namespace TimeTrackOfGeniuses
     {
       if (_personnageSelectionne == null) return;
 
-      var result = MessageBox.Show(
-          $"Voulez-vous vraiment supprimer {_personnageSelectionne.Nom} ?",
+      var result = MessageBox.Show($"Voulez-vous vraiment supprimer {_personnageSelectionne.Nom} ?",
           "Confirmer la suppression",
           MessageBoxButton.YesNo,
           MessageBoxImage.Question);
